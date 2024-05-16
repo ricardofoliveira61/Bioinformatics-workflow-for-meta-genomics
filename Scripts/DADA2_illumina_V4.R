@@ -1,6 +1,8 @@
 library("BiocManager")
 library("dada2"); packageVersion("dada2")
 library(ggplot2)
+library(writexl)
+library(openxlsx)
 
 # can be defined in python
 setwd("C:/Users/ricar/Desktop/Git_hub/Projeto/Bioinformatics-workflow-for-meta-genomics")
@@ -9,7 +11,7 @@ path_fastq = "./Data/filtered_mocks/Illumina/tests"
 
 #creating the filterd_reads directory
 filt_path = paste0(path_fastq,"/filtered_reads")
-if (!file.exists(filt_path_test)) {
+if (!file.exists(filt_path)) {
   dir.create(filt_path)}
 
 
@@ -182,26 +184,46 @@ if(length(idx_samples_not_used) != 0){
 }
 
 
-write.csv(track, "dada2_processing.csv")
+#write.csv(track, "dada2_processing.csv")
 
 
 #------------------------------------------------------------------------------------------------
 # Data exportation
-asv_dada = seqtab_V4
+# creating the results directory
+results_path = paste0(path_fastq,"/Results")
+if (!file.exists(results_path)) {
+  dir.create(results_path)}
+
+
+asvs = seqtab_V4
 
 # giving our seq headers more manageable names (ASV1, ASV2...)
-asv_seqs = colnames(asv_dada)
-asv_headers = vector(dim(asv_dada)[2], mode="character")
+asv_seqs = colnames(asvs)
+names_asv = vector(dim(asv_dada)[2], mode="character")
 
 for (i in 1:dim(asv_dada)[2]) {
-  asv_headers[i] = paste(">ASV", i, sep="")
+  names_asv[i] = paste(">ASV", i, sep="")
 }
 
-# making and writing out a fasta of our final ASV seqs:
-asv_fasta = c(rbind(asv_headers, asv_seqs))
-write(asv_fasta, "dada_single_refseq.fa")
+# making and writing out a fasta of the final ASV seqs:
+asv_fasta = c(rbind(names_asv, asv_seqs))
+write(asv_fasta, paste0(results_path,"/asv_single_refseq.fa"))
 
 # count table:
-asv_tab = t(asv_dada)
-row.names(asv_tab) = sub(">", "", asv_headers)
-write.table(asv_tab, "dada_single_counts.tsv", sep="\t", quote=F, col.names=NA)
+asv_tab = as.data.frame(t(asvs))
+row.names(asv_tab) = sub(">", "", names_asv)
+colnames(asv_tab) = sample_names_filt
+
+
+# Creating a workbook
+workbook = createWorkbook()
+
+# Adding DataFrames to separate sheets
+addWorksheet(workbook, sheetName = "Number of reads each step")
+writeData(wb=workbook, sheet = workbook$sheetOrder[1], x = track, rowNames = T)
+
+addWorksheet(workbook, sheetName = "ASVs count")
+writeData(wb=workbook, sheet = workbook$sheetOrder[2], x = asv_tab, rowNames = T)
+
+# Saving the workbook
+saveWorkbook(workbook, file = paste0(results_path,"/amplicon_results.xlsx"), overwrite = TRUE)
