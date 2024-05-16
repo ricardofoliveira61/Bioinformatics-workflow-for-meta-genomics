@@ -9,6 +9,8 @@ setwd("C:/Users/ricar/Desktop/Git_hub/Projeto/Bioinformatics-workflow-for-meta-g
 # given on python
 path_fastq = "./Data/filtered_mocks/Illumina/tests"
 
+region = "V4"
+
 #creating the filterd_reads directory
 filt_path = paste0(path_fastq,"/filtered_reads")
 if (!file.exists(filt_path)) {
@@ -58,11 +60,18 @@ names(filtRv) = sample_names
 
 
 # Filtration of fastq files
+if(region == "V4"){
 out = filterAndTrim(illumina_fw, filtFw, illumina_rv, filtRv, truncLen=c(240,240),
                     minLen=200, trimLeft=10, truncQ=2, maxEE=c(1,2), maxN=0, rm.phix=TRUE,
                     compress=TRUE, verbose=TRUE, multithread=TRUE)
+} else{
+  out = filterAndTrim(illumina_fw, filtFw, illumina_rv, filtRv, truncLen=c(249,249),
+                    minLen=200, trimLeft=10, truncQ=2, maxEE=c(1,2), maxN=0, rm.phix=TRUE,
+                    compress=TRUE, verbose=TRUE, multithread=TRUE)
+}
 
 
+# extracting the path to the filtered fastqfiles
 illumina_fw_filt = sort(list.files(filt_path, pattern="_Fw_filt.fastq", full.names = TRUE))
 illumina_rv_filt = sort(list.files(filt_path, pattern="_Rv_filt.fastq", full.names = TRUE))
 # extracing sample names
@@ -123,17 +132,19 @@ merger = mergePairs(dadaFs, illumina_fw_filt, dadaRs,
 
 #table construction of all ASVs
 seqtab = makeSequenceTable(merger)
+table(nchar(getSequences(seqtab))) 
 # removing chimeras
 seqtab_no_chim = removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
+table(nchar(getSequences(seqtab_no_chim))) 
 #sum(seqtab_no_chim)/sum(seqtab) # perguntar o que isto faz
 
 # filtering the results to only have the V4 amplicon Data
-seqtab_V4 = seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 230:240]
+if(region=="V4"){
+  seqtab_filt = seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 230:240]  
+} else {
+  seqtab_filt = seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 420:450]
+}
 
-
-# removing singletons
-is_1 = colSums(seqtab_V4) <= 1
-seqtab_V4 = seqtab_V4[,!is_1]
 
 #------------------------------------------------------------------------------------------------
 # tracking the number of reads in each step of the workflow
@@ -184,9 +195,6 @@ if(length(idx_samples_not_used) != 0){
 }
 
 
-#write.csv(track, "dada2_processing.csv")
-
-
 #------------------------------------------------------------------------------------------------
 # Data exportation
 # creating the results directory
@@ -195,7 +203,7 @@ if (!file.exists(results_path)) {
   dir.create(results_path)}
 
 
-asvs = seqtab_V4
+asvs = seqtab_filt
 
 # giving our seq headers more manageable names (ASV1, ASV2...)
 asv_seqs = colnames(asvs)
