@@ -45,14 +45,16 @@ if (!file.exists("./Data/filtered_mocks/Illumina/plots")) {  # Check if director
   dir.create("./Data/filtered_mocks/Illumina/plots")  # Create directory if needed (optional)
 }
 plotQualityProfile(ad_illumina_fw[1:3])
+ggplot() # adding the title
+title("Quality profile")
 # saving the plot
 ggsave(filename = "quality_unfiltered.png", path = paste0(path_test,"/plots"),
        width = 496 , height = 443, limitsize = F, units = "mm")
 
 
 # creating the path to store the filtered fastq files
-filtFw = file.path(filt_path_test, paste0(sample_names, "_Fw_filt.fastq"))
-filtRv = file.path(filt_path_test, paste0(sample_names, "_Rv_filt.fastq"))
+filtFw = file.path(filt_path_test, paste0(sample_names_test, "_Fw_filt.fastq"))
+filtRv = file.path(filt_path_test, paste0(sample_names_test, "_Rv_filt.fastq"))
 names(filtFw) = sample_names_test
 names(filtRv) = sample_names_test
 
@@ -60,7 +62,7 @@ names(filtRv) = sample_names_test
 # using the funcion to filter and trim the fastQ files 
 # using windows can take longer to filter since it the pacakge can't use multithread
 out = filterAndTrim(ad_illumina_fw, filtFw, ad_illumina_rv, filtRv, truncLen=c(240,240),
-                    minLen=200, trimLeft=10, truncQ=2, maxEE=1, maxN=0, rm.phix=TRUE,
+                    minLen=200, trimLeft=10, truncQ=2, maxEE=c(1,2), maxN=0, rm.phix=TRUE,
                     compress=TRUE, verbose=TRUE, multithread=TRUE)
 
 ad_illumina_fw_filt = sort(list.files(filt_path_test, pattern="_Fw_filt.fastq", full.names = TRUE))
@@ -70,6 +72,7 @@ sample_names_filt = sapply(strsplit(basename(ad_illumina_fw_filt), "\\_"), `[`, 
 
 # ploting the quality profile of the filtered fastQ files
 plotQualityProfile(filtFw[1:3])
+title("quality profile")
 # saving the plot
 ggsave(filename = "quality_filtered.png", path = paste0(path_test,"/plots"),
        width = 496 , height = 443, limitsize = F, units = "mm")
@@ -114,7 +117,8 @@ dim(seqtab_no_chim)
 table(nchar(getSequences(seqtab_no_chim)))
 sum(seqtab_no_chim)/sum(seqtab)
 
-seqtab2 = seqtab[,nchar(colnames(seqtab)) %in% 250:256]
+seqtab2 = seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 231:240]
+table(nchar(getSequences(seqtab2)))
 
 
 # tracking the number of reads in each step of the workflow
@@ -122,10 +126,10 @@ getN = function(x) sum(getUniques(x))
 track = cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(merger, getN), rowSums(seqtab_no_chim))
 # If processing a single sample, remove the sapply calls: e.g. replace sapply(dadaFs, getN) with getN(dadaFs)
 colnames(track) = c("input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
-rownames(track) = sample_names_filt
+rownames(track) = sample_names_test
 head(track)
 
-
+# add the code to export the data
 
 # for all Illumina samples
 path = "./Data/filtered_mocks/Illumina"
@@ -227,7 +231,7 @@ sum(seqtab_no_chim)/sum(seqtab)
 
 seqtab2 = seqtab[,nchar(colnames(seqtab)) %in% 250:256]
 
-
+out
 # tracking the number of reads in each step of the workflow
 getN = function(x) sum(getUniques(x))
 track = cbind(out, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(merger, getN), rowSums(seqtab_no_chim))
