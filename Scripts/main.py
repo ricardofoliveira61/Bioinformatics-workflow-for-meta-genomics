@@ -10,7 +10,7 @@ while True:
     if sofware == "DADA2":
 
         if seq_tech == "ILLUMINA":
-            subprocess.run(["python", "./scripts/illumina_r.py" , project,workdir ,fastq_files, region])
+            subprocess.run(["python3", "Scripts/illumina_r.py" , project,workdir ,fastq_files, region])
 
 
     break

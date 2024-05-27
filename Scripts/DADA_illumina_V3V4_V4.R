@@ -5,33 +5,39 @@ library(writexl)
 library(openxlsx)
 
 # can be defined in python
-setwd("C:/Users/ricar/Desktop/Git_hub/Projeto/Bioinformatics-workflow-for-meta-genomics")
-# given on python
-path_fastq = "./Data/filtered_mocks/Illumina/tests"
 
-region = "V4"
+setwd(workdir)
+getwd()
+#setwd("C:/Users/ricar/Desktop/Git_hub/Projeto/Bioinformatics-workflow-for-meta-genomics")
+# given on python
+#path_fastq = "./Data/filtered_mocks/Illumina/tests"
+
+#region = "V4"
 
 #creating the filterd_reads directory
-filt_path = paste0(path_fastq,"/filtered_reads")
+filt_path = paste0(fastq_files,"/filtered_reads")
 if (!file.exists(filt_path)) {
   dir.create(filt_path)}
 
 
 # reading the forward and reverse reads files
-illumina_fw = sort(list.files(path_fastq, pattern="_R1.fastq", full.names = TRUE))
-illumina_rv = sort(list.files(path_fastq, pattern="_R2.fastq", full.names = TRUE))
+#illumina_fw = sort(list.files(path_fastq, pattern="_R1.fastq", full.names = TRUE))
+#illumina_rv = sort(list.files(path_fastq, pattern="_R2.fastq", full.names = TRUE))
+illumina_fw = sort(list.files(fastq_files, pattern="_R1.fastq", full.names = TRUE))
+illumina_rv = sort(list.files(fastq_files, pattern="_R2.fastq", full.names = TRUE))
+
 # extracing samples names
 sample_names = sapply(strsplit(basename(illumina_fw), "\\_"), `[`, 1)
 
 
 # creating the directory to store the plots
-plot_path= paste0(path_fastq,"/plots")
+plot_path= paste0(workdir,"/plots")
 if (!file.exists(plot_path)) {  
   dir.create(plot_path)}
 
 
 # creating the directory to store the quality profile plots of the unfiltered fastq files
-plot_path_unfiltered= paste0(path_fastq,"/plots/quality_unfiltered")
+plot_path_unfiltered= paste0(plot_path,"/quality_unfiltered")
 if (!file.exists(plot_path_unfiltered)) {  
   dir.create(plot_path_unfiltered)}
 
@@ -79,7 +85,7 @@ sample_names_filt = sapply(strsplit(basename(illumina_fw_filt), "\\_"), `[`, 1)
 
 
 #creating the directory to store the quality profile plots of the filtered fastq files
-plot_path_filtered= paste0(path_fastq,"/plots/quality_filtered")
+plot_path_filtered= paste0(plot_path,"/quality_filtered")
 if (!file.exists(plot_path_filtered)) {  
   dir.create(plot_path_filtered)}
 
@@ -106,7 +112,7 @@ errF = learnErrors(illumina_fw_filt, multithread=TRUE)
 errR = learnErrors(illumina_rv_filt, multithread=TRUE)
 
 
-plot_errors_path = paste0(path_fastq,"/plots/errors")
+plot_errors_path = paste0(plot_path,"/errors")
 if (!file.exists(plot_errors_path)) {  
   dir.create(plot_errors_path)}
 
@@ -198,7 +204,7 @@ if(length(idx_samples_not_used) != 0){
 #------------------------------------------------------------------------------------------------
 # Data exportation
 # creating the results directory
-results_path = paste0(path_fastq,"/Results")
+results_path = paste0(workdir,"/Results")
 if (!file.exists(results_path)) {
   dir.create(results_path)}
 
