@@ -9,9 +9,9 @@ def region_seqtech_input ():
         if seq_tech in ["ILLUMINA", "PACBIO", "ONP"]: break
         else: seq_tech= input(f"'{seq_tech}' is an invalid input. Please choose from: Illumina, PacBio or ONP: ").upper()
     
-    region = input("Which region was sequencided? [V3, V3-V4]: " ).upper()
+    region = input("Which region was sequencided? [V4, V3-V4]: " ).upper()
     while True:
-        if region in ["V3", "V3-V4"]: break
+        if region in ["V4", "V3-V4"]: break
         else: region = input(f"'{region}' is an invalid input. Please choose from: V3 or V3-V4: ").upper()
     
     return seq_tech, region
@@ -58,4 +58,7 @@ def get_user_inputs (first = True):
         software = analysis_software()
         seq_tech, region = region_seqtech_input()
 
-    return project, workdir, fastq_files, software, seq_tech, region
+        return project, workdir, fastq_files, software, seq_tech, region
+
+    else:
+        pass
