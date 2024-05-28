@@ -5,7 +5,7 @@ missing_packages = setdiff(packages_to_check, installed_packages)
 
 if (length(missing_packages) > 0) {
   message(paste("Installing missing packages:", paste(missing_packages, collapse = ", ")))
-  install.packages(missing_packages, dependencies = TRUE)  # Install dependencies
+  install.packages(missing_packages, dependencies = TRUE)
 } else {
   message("All required packages are already installed.")
 }
@@ -72,4 +72,5 @@ if(classifier == "DECIPHER"){
   
 }
 
-
+# criar código para guardar os dados, com base na basededados utilizada
+plot(ids, trainingSet)
