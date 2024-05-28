@@ -20,7 +20,7 @@ def region_seqtech_input ():
 def project_name():
     project = input("How do you want to name your analysis?: ")
     while True:
-        if not re.match(r'^[A-Za-z_-]+$',project):
+        if not re.match(r'^[0-9A-Za-z_-]+$',project):
             project = input("Invalid project name. Use only alphanumeric characters (a-z, A-Z, 0-9), underscores (_) and hyphens (-): ")
         
         else: return project
@@ -30,14 +30,12 @@ def direcoty_paths (first=True):
     if first:
         workdir = input("What is the working directory? (Must be the absolute path): ")
         while True:
-            if os.path.isabs(workdir):
-                break
+            if os.path.isabs(workdir): break
             else: workdir = input ("Invalid working directory: ")
 
         fastq_files = input("What is the diretory of the fastqfiles? (Must be the absolute path): ")
         while True:
-            if os.path.isabs(fastq_files):
-                break
+            if os.path.isabs(fastq_files): break
             else: fastq_files = input ("Invalid directory: ")
 
         return workdir, fastq_files
@@ -45,8 +43,7 @@ def direcoty_paths (first=True):
     else:
         fastq_files = input("What is the diretory of the fastqfiles? (Must be the absolute path): ")
         while True:
-            if os.path.isabs(fastq_files):
-                break
+            if os.path.isabs(fastq_files): break
             else: fastq_files = input ("Invalid directory: ")
 
         return fastq_files
@@ -56,8 +53,7 @@ def analysis_software():
     software = input("Which software you want to use? [DADA2, Vsearch]: ").upper()
 
     while True:
-        if software in ["DADA2", "VSEARCH"]:
-            return software
+        if software in ["DADA2", "VSEARCH"]: return software
         else: software = input ("Invalid software. Please choose from: DADA2 or Vsearch: ").upper()
 
 
@@ -117,3 +113,15 @@ def script_2_run ( project:str, workdir:str, fastq_files:str, sofware:str, seq_t
 
         else:
             print(f"The platform {seq_tech} is not supported")
+
+
+def what_next():
+    ans = int(input("\n\nWhat do want to do next [1: New ampluicon analysis, 2: Procced to amplicon classification, 3: Exit](Use only numbers): "))
+    while True:
+        if ans in [1, 2, 3]: return ans
+        else: ans = int(input ("Invalid answer. Please choose the number from: 1: New ampluicon analysis, 2: Procced to amplicon classification, 3: Exit: "))
+
+
+
+if __name__=="__main__":
+    what_next()
