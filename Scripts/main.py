@@ -1,24 +1,20 @@
 import inputs
-import subprocess
+
 
 first_run = True
 while True:
     if first_run:
-        project, workdir, fastq_files, sofware, seq_tech, region = inputs.get_user_inputs()        
-        first_run = False
+        project, workdir, fastq_files, sofware, seq_tech, region = inputs.get_user_inputs(first_run); first_run = False
 
-    if sofware == "DADA2":
+    else: project, fastq_files, sofware, seq_tech, region = inputs.get_user_inputs(first_run)   
 
-        if seq_tech == "ILLUMINA":
-            subprocess.run(["python3", "Scripts/illumina_r.py" , project,workdir ,fastq_files, region])
+    inputs.script_2_run(project, workdir, fastq_files, sofware, seq_tech, region) 
 
+    ans =inputs.what_next()
+    if ans == 1:
+        continue
+    elif ans == 3:
+        exit()
 
-    break
-
-
-
-
-
-
-
-
+    print("Classification not avaivle for now")
+    exit()
