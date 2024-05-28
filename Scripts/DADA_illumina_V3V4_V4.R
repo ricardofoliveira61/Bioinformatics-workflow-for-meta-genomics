@@ -102,7 +102,6 @@ out = filterAndTrim(illumina_fw, filtFw, illumina_rv, filtRv, truncLen=c(240,240
                     minLen=200, trimLeft=10, truncQ=2, maxEE=c(1,2), maxN=0, rm.phix=TRUE,
                     compress=TRUE, verbose=FALSE, multithread=TRUE)
 } else if(region=="V3-V4"){
-  print("V3-V4")
   out = filterAndTrim(illumina_fw, filtFw, illumina_rv, filtRv, truncLen=c(249,249),
                     minLen=200, trimLeft=10, truncQ=2, maxEE=c(1,2), maxN=0, rm.phix=TRUE,
                     compress=TRUE, verbose=FALSE, multithread=TRUE)
