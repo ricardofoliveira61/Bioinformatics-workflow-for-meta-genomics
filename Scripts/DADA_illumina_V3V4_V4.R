@@ -6,7 +6,10 @@ missing_packages = setdiff(packages_to_check, installed_packages)
 
 if (length(missing_packages) > 0) {
   message(paste("Installing missing packages:", paste(missing_packages, collapse = ", ")))
-  install.packages(missing_packages, dependencies = TRUE)
+  for(package in missing_packages){
+    install.packages(package, dependencies = TRUE, repos = "https://cran.r-project.org")
+  }
+  
 } else {
   message("All required packages are already installed.")
 }
