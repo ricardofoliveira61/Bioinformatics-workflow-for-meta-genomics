@@ -1,18 +1,20 @@
 # environment preparation
 # checking if the necessary R packages are installed
-
 message("\nChecking if all the necessary R packages are installed")
 packages_to_check = c("BiocManager", "writexl","openxlsx", "ggplot2","export") 
 installed_packages = installed.packages()[, "Package"]
 missing_packages = setdiff(packages_to_check, installed_packages)
 if (length(missing_packages) > 0) {
+  
   message(paste("Installing missing packages:", paste(missing_packages, collapse = ", ")))
   for(package in missing_packages){
     install.packages(package, dependencies = TRUE, repos = "https://cran.r-project.org")
+    
   }
-  
 } else {
+  
   message("All required packages are already installed.")
+  
 }
 
 
@@ -22,15 +24,20 @@ packages_to_check = c("DECIPHER","dada2","Biostrings")
 installed_packages = installed.packages()[, "Package"]
 missing_packages = setdiff(packages_to_check, installed_packages)
 if (length(missing_packages) > 0) {
+  
   message(paste("Installing missing packages:", paste(missing_packages, collapse = ", ")))
   for (package in missing_packages){
     BiocManager::install(package)
   }
+  
 } else {
+  
   message("All required BioConductor packages are already installed.")
+  
 }
 
 
+message("\n Loading the necessary packages.")
 # loading the necessary packages
 library(DECIPHER);message("DECHIPHER version: ",packageVersion("DECIPHER"))
 library(dada2); message("DADA2 version: ",packageVersion("dada2"))
@@ -46,22 +53,24 @@ database = as.character(commandArgs(TRUE)[4])
 fasta_file = as.character(commandArgs(TRUE)[5])
 main_path = as.character(commandArgs(TRUE)[6])
 parent_folder = dirname(main_path)
-
-
-# changing the working directory
 setwd(workdir)
+
 
 message(paste0("\nLoading the database ",database))
 # loading the training set of each database
 if(database == "SILVA"){
+  
   load(paste0(parent_folder, "/Databases/SILVA_SSU_r138_2019.RData"))
 
 } else if (database == "RDP"){
+  
   load(paste0(parent_folder, "/Databases/RDP_v18_July2020.RData"))
 
 } else if (database == "GREENGENES"){
+  
   print("Not avaible yet")
   q()
+  
   }
 
 
@@ -124,6 +133,8 @@ if(classifier == "DECIPHER"){
   #     path = assignment_path_results)
   #width = 500, height = 500, units = "mm"
 } else{
+  
   print("Classifer not avaible yet")
   q()
+  
   }
