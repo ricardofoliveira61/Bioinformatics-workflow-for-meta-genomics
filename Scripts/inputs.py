@@ -2,27 +2,10 @@ import re; import os; import platform; import subprocess; import os
 
 
 def action():
-    inp = int(input("What do you pretend to do [1:amplicon analysis, 2: ASV classification, 3: phyloseq analysis, 4: Exit](pick a number): "))
-    if inp in range(1,5): return inp
-    else: inp = int(input("Invalid answer. Choose from 1:amplicon analysis, 2: ASV classification, 3: phyloseq analysis, 4: Exit "))
-
-
-def script(state:int,workdir):
-    
-    if state == 1: 
-        project, fastq_files, software, seq_tech, region = get_user_inputs ()
-        amplicon_script_2_run(project, workdir, fastq_files, software, seq_tech, region)
-    
-    elif state == 2:
-        project, classifier_met, data_base, fasta_path = classifier()
-        classier_scrit_2_run(workdir, project, classifier_met, data_base, fasta_path)
-        
-
-    elif state == 3:
-        print("Not available yet")
-
-    else:
-        exit()
+    inp = input("What do you pretend to do [1:amplicon analysis, 2: ASV classification, 3: phyloseq analysis, 4: Exit](pick a number): ").strip()
+    while True:
+        if inp in ["1","2","3","4"]: return int(inp)
+        else: inp = input("Invalid answer. Choose from 1:amplicon analysis, 2: ASV classification, 3: phyloseq analysis, 4: Exit ").strip()
 
 
 def region_seqtech_input ():
@@ -84,7 +67,6 @@ def get_user_inputs ():
 
 def dada2_illumina(project:str, workdir:str, fastq_files:str, region:str):
     
-
     if platform.system() == "Windows":
 
         if len( os.listdir("C:/Program Files/R")) == 0:
@@ -93,11 +75,11 @@ def dada2_illumina(project:str, workdir:str, fastq_files:str, region:str):
 
         else:
             r_script_path = os.path.join("C:/", "Program Files", "R", os.listdir("C:/Program Files/R")[0], "bin", "Rscript")
-            print("\n\nStarting default amplicon analysis using DADA2 for Illumina platform")
+            print("\nStarting default amplicon analysis using DADA2 for Illumina platform")
             subprocess.call([r_script_path, "Scripts/DADA_illumina_V3V4_V4.R", project, workdir, fastq_files, region], shell=False)
 
     elif platform.system() == "Linux":
-        print("\n\nStarting default amplicon analysis using DADA2 for Illumina platform")
+        print("\nStarting default amplicon analysis using DADA2 for Illumina platform")
         subprocess.call(["Rscript", "Scripts/DADA_illumina_V3V4_V4.R",project, workdir, fastq_files, region], shell=True)
 
     else:
@@ -111,7 +93,7 @@ def amplicon_script_2_run ( project:str, workdir:str, fastq_files:str, sofware:s
     if sofware == "DADA2":
         if seq_tech == "ILLUMINA":
             dada2_illumina(project, workdir, fastq_files, region)
-            print("\n\nAnalysis concluded. Verify the results before proceeding")
+            print("\nAnalysis concluded. Verify the results before proceeding")
         
         elif seq_tech == "PACBIO":
             pass
@@ -133,7 +115,7 @@ def amplicon_script_2_run ( project:str, workdir:str, fastq_files:str, sofware:s
 def classifier_method():
     classifier = input("Which classifier you intend to use [Decipher, rdp, sintax]: ").upper()
     while True:
-        if classifier in ["DECIPHE", "RDP","SINTAX"]: return classifier
+        if classifier in ["DECIPHER", "RDP","SINTAX"]: return classifier
         else: classifier = input("Invalid classifier. Please choose from Decipher, rdp or sintax: ").upper()
 
 
@@ -159,8 +141,8 @@ def classifier():
     return project, classifier_met, data_base, fasta_path
 
 
-def classier_scrit_2_run(workdir, project, classifier_met, data_base, fasta_path):
-    if classifier_met == "DECIPHER":
+def classier_script_2_run(workdir:str, project:str, classifier_met:str, data_base:str, fasta_path:str, main_path:str):
+    if classifier_met in ["DECIPHER", "RDP"]:
         if platform.system() == "Windows":
 
             if len( os.listdir("C:/Program Files/R")) == 0:
@@ -169,21 +151,41 @@ def classier_scrit_2_run(workdir, project, classifier_met, data_base, fasta_path
 
             else:
                 r_script_path = os.path.join("C:/", "Program Files", "R", os.listdir("C:/Program Files/R")[0], "bin", "Rscript")
-                print("\n\nStarting ASVs assignment using DECIPHER")
-                subprocess.call([r_script_path, "Scripts/decipher_rdp_classifiers.R", project, workdir, data_base, fasta_path], shell=False)
-                print("\n\nTask concluded")
+                print(f"\nStarting ASVs assignment using {classifier_met}")
+                subprocess.call([r_script_path, "Scripts/decipher_rdp_classifiers.R", project, workdir, classifier_met, data_base, fasta_path, main_path], shell=False)
+                print("\nTask concluded")
 
         elif platform.system() == "Linux":
-            print("\n\nStarting ASVs assignment using DECIPHER")
-            subprocess.call(["Rscript", "Scripts/decipher_rdp_classifiers.R",project, workdir, data_base, fasta_path], shell=True)
-            print("\n\nTask concluded")
+            print("\nStarting ASVs assignment using DECIPHER")
+            subprocess.call(["Rscript", "Scripts/decipher_rdp_classifiers.R",project, workdir, classifier_met, data_base, fasta_path, main_path], shell=True)
+            print("\nTask concluded")
+
+        else:
+            print(f"Platform {platform.system()} not supported")
+            exit() 
+    
+    else:
+        print(f"\nThe classifier {classifier_met} is not avaiable yet")
+
+
+def script(state:int,workdir:str, main_path:str):
+    
+    if state == 1: 
+        project, fastq_files, software, seq_tech, region = get_user_inputs ()
+        amplicon_script_2_run(project, workdir, fastq_files, software, seq_tech, region)
+    
+    elif state == 2:
+        project, classifier_met, data_base, fasta_path = classifier()
+        classier_script_2_run(workdir, project, classifier_met, data_base, fasta_path, main_path)
+        
+
+    elif state == 3:
+        print("\nNot available yet")
 
     else:
-        print(f"Platform {platform.system()} not supported")
         exit()
 
 
-
-#if __name__ =="__main__":
-#    script(1,"C:\\Users\\ricar\\Desktop\\Teste")
+if __name__ =="__main__":
+    os.path.dirname(os.path.abspath(__file__))
 
