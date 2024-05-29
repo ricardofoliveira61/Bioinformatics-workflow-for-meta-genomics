@@ -56,10 +56,18 @@ if (!file.exists(filt_path)) {
   dir.create(filt_path)
 }
 
-
 # reading the forward and reverse reads files
 illumina_fw = sort(list.files(fastq_files, pattern="_R1.fastq", full.names = TRUE))
-illumina_rv = sort(list.files(fastq_files, pattern="_R2.fastq", full.names = TRUE))
+
+if (length(illumina_fw) == 0){
+
+  illumina_fw = sort(list.files(fastq_files, pattern="_1.fastq", full.names = TRUE))
+  illumina_rv = sort(list.files(fastq_files, pattern="_2.fastq", full.names = TRUE))
+} else{
+  
+  illumina_rv = sort(list.files(fastq_files, pattern="_R2.fastq", full.names = TRUE))
+}
+
 # extracing samples names
 sample_names = sapply(strsplit(basename(illumina_fw), "\\_"), `[`, 1)
 
