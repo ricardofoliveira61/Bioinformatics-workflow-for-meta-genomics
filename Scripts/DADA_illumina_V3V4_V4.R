@@ -3,7 +3,6 @@ message("\nChecking if all the necessary R packages are installed")
 packages_to_check = c("BiocManager", "ggplot2", "writexl", "openxlsx") 
 installed_packages = installed.packages()[, "Package"]
 missing_packages = setdiff(packages_to_check, installed_packages)
-
 if (length(missing_packages) > 0) {
   message(paste("Installing missing packages:", paste(missing_packages, collapse = ", ")))
   for(package in missing_packages){
@@ -30,6 +29,7 @@ if (length(missing_packages) > 0) {
 }
 
 
+message("\n Loading the necessary packages.")
 #loading necessary libraries
 library("dada2"); message("DADA2 version: ",packageVersion("dada2"))
 library(ggplot2); library(writexl); library(openxlsx)
@@ -56,17 +56,20 @@ if (!file.exists(filt_path)) {
   dir.create(filt_path)
 }
 
+
 # reading the forward and reverse reads files
 illumina_fw = sort(list.files(fastq_files, pattern="_R1.fastq", full.names = TRUE))
-
 if (length(illumina_fw) == 0){
 
   illumina_fw = sort(list.files(fastq_files, pattern="_1.fastq", full.names = TRUE))
   illumina_rv = sort(list.files(fastq_files, pattern="_2.fastq", full.names = TRUE))
+  
 } else{
   
   illumina_rv = sort(list.files(fastq_files, pattern="_R2.fastq", full.names = TRUE))
+  
 }
+
 
 # extracing samples names
 sample_names = sapply(strsplit(basename(illumina_fw), "\\_"), `[`, 1)
@@ -134,7 +137,6 @@ illumina_rv_filt = sort(list.files(filt_path, pattern="_Rv_filt.fastq", full.nam
 
 # extracing sample names
 sample_names_filt = sapply(strsplit(basename(illumina_fw_filt), "\\_"), `[`, 1)
-
 
 
 #creating the directory to store the quality profile plots of the filtered fastq files
