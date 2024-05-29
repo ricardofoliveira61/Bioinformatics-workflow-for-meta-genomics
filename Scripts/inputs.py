@@ -1,24 +1,56 @@
 import re; import os; import platform; import subprocess; import os
 
 
-def action():
+def action()->int:
+    """
+    This function is used to ask the user what he wants to do.
+    If the input is not valid the user will be warned and a new input will be asked.
+        
+    Parameters
+    ----------
+    This function doesn't recieve parameters
+
+    Returns
+    -----------
+    int:
+        A integer that represents what the user pretends to do. \n
+
+    - 1: amplicon analysis
+    - 2: ASV classification
+    - 3: phyloseq analysis
+    - 4: Exit
+    """
+
     inp = input("What do you pretend to do [1:amplicon analysis, 2: ASV classification, 3: phyloseq analysis, 4: Exit](pick a number): ").strip()
     while True:
         if inp in ["1","2","3","4"]: return int(inp)
-        else: inp = input("Invalid answer. Choose from 1:amplicon analysis, 2: ASV classification, 3: phyloseq analysis, 4: Exit ").strip()
+        else: inp = input(f"{inp} is an invalid answer. Choose from 1:amplicon analysis, 2: ASV classification, 3: phyloseq analysis, 4: Exit ").strip()
 
 
 def region_seqtech_input ():
+    """
+    This function is used to ask the user which 16s regions was sequenced and which technology was used.
+    If the input is not valid the user will be warned and a new input will be asked.
+        
+    Parameters
+    ----------
+    This function doesn't recieve parameters
+
+    Returns
+    -----------
+    (str,str):
+        Returns a tuple where the first element is the sequencing technology and the second one the region of 16S sequenced
+    """
+
+    region = input("Which region was sequencided? [V4, V3-V4]: " ).upper()
+    while True:
+        if region in ["V4", "V3-V4"]: break
+        else: region = input(f"'{region}' is an invalid input. Please choose from: V4 or V3-V4: ").upper()
 
     seq_tech = input("What is the sequence thecnology used? [Illumina, PacBio, ONP]: ").upper()
     while True:
         if seq_tech in ["ILLUMINA", "PACBIO", "ONP"]: break
         else: seq_tech= input(f"'{seq_tech}' is an invalid input. Please choose from: Illumina, PacBio or ONP: ").upper()
-    
-    region = input("Which region was sequencided? [V4, V3-V4]: " ).upper()
-    while True:
-        if region in ["V4", "V3-V4"]: break
-        else: region = input(f"'{region}' is an invalid input. Please choose from: V4 or V3-V4: ").upper()
     
     return seq_tech, region
 
