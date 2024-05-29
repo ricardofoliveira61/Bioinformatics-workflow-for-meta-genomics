@@ -1,13 +1,16 @@
 # environment preparation
-# cheking if the necessary R packages are installed
+# checking if the necessary R packages are installed
 
-message("\nCheking if all the necessary R packages are installed")
-packages_to_check = c("BiocManager") 
+message("\nChecking if all the necessary R packages are installed")
+packages_to_check = c("BiocManager", "writexl","openxlsx", "ggplot2","export") 
 installed_packages = installed.packages()[, "Package"]
 missing_packages = setdiff(packages_to_check, installed_packages)
 if (length(missing_packages) > 0) {
   message(paste("Installing missing packages:", paste(missing_packages, collapse = ", ")))
-  install.packages(missing_packages, dependencies = TRUE)
+  for(package in missing_packages){
+    install.packages(package, dependencies = TRUE, repos = "https://cran.r-project.org")
+  }
+  
 } else {
   message("All required packages are already installed.")
 }
@@ -32,6 +35,7 @@ if (length(missing_packages) > 0) {
 library(DECIPHER);message("DECHIPHER version: ",packageVersion("DECIPHER"))
 library(dada2); message("DADA2 version: ",packageVersion("dada2"))
 library(Biostrings); message("Biostrings version: ",packageVersion("Biostrings"))
+library(writexl); library(openxlsx); library(ggplot2)
 
 
 # defining variables given by python
@@ -47,16 +51,17 @@ parent_folder = dirname(main_path)
 # changing the working directory
 setwd(workdir)
 
-message(paste0("\nLoading the database",database))
+message(paste0("\nLoading the database ",database))
 # loading the training set of each database
 if(database == "SILVA"){
   load(paste0(parent_folder, "/Databases/SILVA_SSU_r138_2019.RData"))
-  print("SILVA")
+
 } else if (database == "RDP"){
   load(paste0(parent_folder, "/Databases/RDP_v18_July2020.RData"))
-  print("RDP")
+
 } else if (database == "GREENGENES"){
-  print("GREEN")
+  print("Not avaible yet")
+  q()
   }
 
 
@@ -64,10 +69,17 @@ if(database == "SILVA"){
 assignment_path = paste0(workdir,"/assignment_results")
 if (!file.exists(assignment_path)) {  
   dir.create(assignment_path)
-  }
+}
 
 
-message(paste0("\nRunning the classifier",classifier))
+# creating the project directory
+assignment_path_results = paste0(assignment_path,"/",project)
+if (!file.exists(assignment_path_results)) {  
+  dir.create(assignment_path_results)
+}
+
+
+message(paste0("\nRunning the classifier ",classifier))
 # running the classifiers
 if(classifier == "DECIPHER"){
 
@@ -92,13 +104,26 @@ if(classifier == "DECIPHER"){
   }
   
   # adding the cofindece to the matrix
-  taxid= cbind(taxid,confidence)
+  taxid= cbind(taxid,confidence); taxid = as.data.frame(taxid)
+  taxid$confidence = as.numeric(taxid$confidence)
   
+  message("\nSaving the Taxonomic classification results")
+  # Creating a workbook
+  workbook = createWorkbook()
+  
+  # Adding DataFrames to separate sheets
+  addWorksheet(workbook, sheetName = "Taxonomies")
+  writeData(wb=workbook, sheet = workbook$sheetOrder[1], x = taxid, rowNames = T)
+  
+  # Saving the workbook
+  saveWorkbook(workbook, file = paste0(assignment_path_results,"/", project,"_", database,
+                                       "_classification_results.xlsx"), overwrite = TRUE)
+  
+  #plot(ids, trainingSet)
+  #ggsave(filename = paste0(project,"_",database,"_classification_results.png"), 
+  #     path = assignment_path_results)
+  #width = 500, height = 500, units = "mm"
 } else{
   print("Classifer not avaible yet")
+  q()
   }
-
-# criar código para guardar os dados, com base na basededados utilizada
-plot(ids, trainingSet)
-
-
