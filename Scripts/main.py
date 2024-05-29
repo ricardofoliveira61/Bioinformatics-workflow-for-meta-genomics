@@ -1,11 +1,14 @@
-import inputs
+import inputs; import os
+
 
 
 workdir = inputs.work_dir()
+main_path = os.path.dirname(os.path.abspath(__file__))
 while True:
 
     state = inputs.action()
-    inputs.script(state, workdir)
+    inputs.script(state, workdir, main_path)
+    print()
 
 
 
