@@ -301,11 +301,13 @@ message("\nSaving analysis status and ASVs count into a excel file")
 workbook = createWorkbook()
 
 # Adding DataFrames to separate sheets
-addWorksheet(workbook, sheetName = "Number of reads each step")
-writeData(wb=workbook, sheet = workbook$sheetOrder[1], x = track, rowNames = T)
 
 addWorksheet(workbook, sheetName = "ASVs count")
-writeData(wb=workbook, sheet = workbook$sheetOrder[2], x = asv_tab, rowNames = T)
+writeData(wb=workbook, sheet = workbook$sheetOrder[1], x = asv_tab, rowNames = T)
+
+addWorksheet(workbook, sheetName = "Number of reads each step")
+writeData(wb=workbook, sheet = workbook$sheetOrder[2], x = track, rowNames = T)
+
 
 # Saving the workbook
 saveWorkbook(workbook, file = paste0(results_path,"/", project,"_amplicon_results.xlsx"), overwrite = TRUE)
