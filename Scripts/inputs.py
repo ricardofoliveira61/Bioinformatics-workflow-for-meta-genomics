@@ -1,4 +1,4 @@
-import re; import os; import platform; import subprocess; import os
+import re; import os; import platform; import subprocess; import os; import glob
 
 
 def action()->int:
@@ -56,6 +56,16 @@ def region_seqtech_input ():
 
 
 def project_name():
+    """
+    Prompts the user for a project name and validates it
+    to ensure it only contains alphanumeric characters (a-z, A-Z, 0-9), underscores (_),
+    and hyphens (-). The function continues to prompt for input until a valid name is provided.
+
+    Returns
+    ---------------
+        str: 
+            The valid project name entered by the user.
+    """
     project = input("How do you want to name your files?: ")
     while True:
         if not re.match(r'^[0-9A-Za-z_-]+$',project):
@@ -65,18 +75,47 @@ def project_name():
 
 
 def work_dir():
+    """
+    Asks the user for the absolute path of the working directory and validates it.
+    A new prompt will be done if until a valid path is given
+
+    Returns
+    --------------------
+        str: 
+            The absolute path to the working directory.
+    """
     workdir = input("What is the working directory? (Must be the absolute path): ")
     while True:
         if os.path.isabs(workdir): return workdir
         else: workdir = input ("Invalid working directory: ")
 
 
-
 def direcoty_paths ():
-    fastq_files = input("What is the diretory of the fastqfiles? (Must be the absolute path): ")
+    """
+    Prompts the user for the directory containing FASTQ files, validates the path,
+    and returns a list of FASTQ file paths.
+
+    Returns
+    ------------
+        str: 
+            A string of the absolute path to the FASTQ files.
+        None: 
+            If no valid directory or FASTQ files are found.
+    """
+
+    fastq_dir = input("What is the diretory of the fastqfiles? (Must be the absolute path): ")
     while True:
-        if os.path.isabs(fastq_files): return fastq_files
-        else: fastq_files = input ("Invalid directory: ")        
+        if os.path.isabs(fastq_dir): break
+        else: fastq_dir = input ("Invalid directory: ")        
+
+    fastq_files = glob.glob(os.path.join(fastq_dir, "*.fastq"), recursive=False)
+
+    if not fastq_files:
+        print(f"No FASTQ files found in '{fastq_dir}'.")
+        return None  # Indicate no FASTQ files found
+
+    
+    return fastq_dir
 
 
 def analysis_software():
@@ -91,7 +130,8 @@ def analysis_software():
 def get_user_inputs ():
 
     project = project_name()
-    fastq_files = direcoty_paths() 
+    fastq_files = None
+    while fastq_files == None: fastq_files = direcoty_paths() 
     software = analysis_software()
     seq_tech, region = region_seqtech_input()
     return project, fastq_files, software, seq_tech, region
@@ -218,6 +258,8 @@ def script(state:int,workdir:str, main_path:str):
         exit()
 
 
+# fazer propmpt para o metado a utilizar para a analise no phyloseq
+
 if __name__ =="__main__":
-    os.path.dirname(os.path.abspath(__file__))
+    get_user_inputs()
 
