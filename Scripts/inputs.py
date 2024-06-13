@@ -262,4 +262,3 @@ def script(state:int,workdir:str, main_path:str):
 
 if __name__ =="__main__":
     get_user_inputs()
-
