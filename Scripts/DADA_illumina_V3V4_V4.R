@@ -1,5 +1,5 @@
 #preparing R environment
-message("\nChecking if all the necessary R packages are installed")
+message("\nChecking if all the necessary R packages are installed...")
 packages_to_check = c("BiocManager", "ggplot2", "writexl", "openxlsx") 
 installed_packages = installed.packages()[, "Package"]
 missing_packages = setdiff(packages_to_check, installed_packages)
@@ -29,7 +29,7 @@ if (length(missing_packages) > 0) {
 }
 
 
-message("\n Loading the necessary packages.")
+message("\n Loading the necessary packages...")
 #loading necessary libraries
 library(dada2); message("DADA2 version: ",packageVersion("dada2"))
 library(ggplot2); library(writexl); library(openxlsx)
@@ -90,7 +90,7 @@ if (!file.exists(plot_path_unfiltered)) {
 }
 
 
-message("\nSaving the quality profile of the unfiltered forward reads")
+message("\nSaving the quality profile of the unfiltered forward reads...")
 for (I in 1:length(illumina_fw)) {
   #print(I)
   #print(illumina_fw[I])
@@ -100,7 +100,7 @@ for (I in 1:length(illumina_fw)) {
 }
 
 
-message("\nSaving the quality profile of the unfiltered reverse reads")
+message("\nSaving the quality profile of the unfiltered reverse reads...")
 for (I in 1:length(illumina_rv)) {
   #print(I)
   #print(illumina_rv[I])
@@ -117,7 +117,7 @@ names(filtFw) = sample_names
 names(filtRv) = sample_names
 
 
-message("\nRead filtering starting")
+message("\nRead filtering starting...")
 # Filtration of fastq files
 if(region == "V4"){
 out = filterAndTrim(illumina_fw, filtFw, illumina_rv, filtRv, truncLen=c(240,240),
@@ -147,7 +147,7 @@ if (!file.exists(plot_path_filtered)) {
 }
 
 
-message("\nSaving the quality profile of the filtered forward reads")
+message("\nSaving the quality profile of the filtered forward reads...")
 for (I in 1:length(illumina_fw_filt)) {
   #print(I)
   #print(illumina_fw_filt[I])
@@ -157,7 +157,7 @@ for (I in 1:length(illumina_fw_filt)) {
 }
 
 
-message("\nSaving the quality profile of the filtered reverse reads")
+message("\nSaving the quality profile of the filtered reverse reads...")
 for (I in 1:length(illumina_rv_filt)) {
   #print(I)
   #print(illumina_rv_filt[I])
@@ -167,7 +167,7 @@ for (I in 1:length(illumina_rv_filt)) {
 }
 
 
-message("\nLearning the error model for the forward and reverse reads")
+message("\nLearning the error model for the forward and reverse reads...")
 #estimate the error model for DADA2 algorithm using forward reads
 errF = learnErrors(illumina_fw_filt, multithread=TRUE)
 #estimate the error model for DADA2 algorithm using reverse reads
@@ -179,7 +179,7 @@ if (!file.exists(plot_errors_path)) {
   dir.create(plot_errors_path)}
 
 
-message("\nSaving the errors plots")
+message("\nSaving the errors plots...")
 plotErrors(errF, nominalQ=TRUE)
 ggsave(filename = "errors_Fw.png", path = plot_errors_path, width = 300, height = 300,
        units = "mm")
@@ -190,22 +190,24 @@ ggsave(filename = "errors_Rv.png", path = plot_errors_path, width = 300, height 
        units = "mm")
 
 
-message("\nCreating the ASVs")
+message("\nCreating ASVs:")
+message("Forward reads...")
 # ASV creation using the error models
 dadaFs = dada(illumina_fw_filt, err=errF, multithread=TRUE) 
-
+message("Reverse reads...")
 dadaRs = dada(illumina_rv_filt, err=errR, multithread=TRUE) 
 
-message("\nMerging the forward and reverse ASVs")
+message("\nMerging the forward and reverse ASVs...")
 merger = mergePairs(dadaFs, illumina_fw_filt, dadaRs,
                     illumina_rv_filt, verbose=TRUE) 
 
 
-message("\nProcessing ASVs results")
+message("\nProcessing ASVs results:")
 #table construction of all ASVs
 seqtab = makeSequenceTable(merger)
 #table(nchar(getSequences(seqtab))) 
 # removing chimeras
+message("Removing chimeras....")
 seqtab_no_chim = removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
 #table(nchar(getSequences(seqtab_no_chim))) 
 #sum(seqtab_no_chim)/sum(seqtab) # perguntar o que isto faz
@@ -275,9 +277,13 @@ if (!file.exists(results_path)) {
   dir.create(results_path)}
 
 if (length(sample_names_filt)==1){
+  
   asvs_dada = t(seqtab_filt)
+  
 } else {
+  
   asvs_dada = seqtab_filt
+  
 }
 
 
@@ -290,7 +296,7 @@ for (i in 1:dim(asvs_dada)[2]) {
 }
 
 
-message("\nSaving the results in a fasta file")
+message("\nSaving ASVs into a fasta file...")
 # making and writing out a fasta of the final ASV seqs:
 asv_fasta = c(rbind(names_asv, asv_seqs))
 write(asv_fasta, paste0(results_path,"/",project,"_asv_single_refseq.fa"))
@@ -302,7 +308,7 @@ row.names(asv_tab) = sub(">", "", names_asv)
 colnames(asv_tab) = sample_names_filt
 
 
-message("\nSaving analysis status and ASVs count into a excel file")
+message("\nSaving analysis status and ASVs count into a excel file...")
 # Creating a workbook
 workbook = createWorkbook()
 
