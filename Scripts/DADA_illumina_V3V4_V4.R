@@ -31,7 +31,7 @@ if (length(missing_packages) > 0) {
 
 message("\n Loading the necessary packages.")
 #loading necessary libraries
-library("dada2"); message("DADA2 version: ",packageVersion("dada2"))
+library(dada2); message("DADA2 version: ",packageVersion("dada2"))
 library(ggplot2); library(writexl); library(openxlsx)
 
 
@@ -41,6 +41,7 @@ workdir = as.character(commandArgs(TRUE)[2])
 fastq_files = as.character(commandArgs(TRUE)[3])
 region = as.character(commandArgs(TRUE)[4])
 setwd(workdir)
+
 
 
 # creating project folder
@@ -211,9 +212,9 @@ seqtab_no_chim = removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE
 
 # filtering the results to only have the V4 amplicon Data or V3-V4
 if(region=="V4"){
-  seqtab_filt = seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 230:240]  
-} else if(region== "V3-V4") {
-  seqtab_filt = seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 420:450]
+  seqtab_filt = as.data.frame(seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 230:240])
+  } else if(region== "V3-V4") {
+  seqtab_filt = as.data.frame(seqtab_no_chim[,nchar(colnames(seqtab_no_chim)) %in% 420:450])
 }
 
 
@@ -269,12 +270,16 @@ if(length(idx_samples_not_used) != 0){
 #------------------------------------------------------------------------------------------------
 # Data exportation
 # creating the results directory
-results_path = paste0(workdir,"/",project,"/Results")
+results_path = paste0(workdir,"/",project,"/asv_results")
 if (!file.exists(results_path)) {
   dir.create(results_path)}
 
+if (length(sample_names_filt)==1){
+  asvs_dada = t(seqtab_filt)
+} else {
+  asvs_dada = seqtab_filt
+}
 
-asvs_dada = seqtab_filt
 
 # giving our seq headers more manageable names (ASV1, ASV2...)
 asv_seqs = colnames(asvs_dada)
@@ -291,7 +296,8 @@ asv_fasta = c(rbind(names_asv, asv_seqs))
 write(asv_fasta, paste0(results_path,"/",project,"_asv_single_refseq.fa"))
 
 # count table:
-asv_tab = as.data.frame(t(asvs_dada))
+#asv_tab = as.data.frame(t(asvs_dada))
+asv_tab = t(asvs_dada)
 row.names(asv_tab) = sub(">", "", names_asv)
 colnames(asv_tab) = sample_names_filt
 
