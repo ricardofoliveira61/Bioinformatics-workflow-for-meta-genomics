@@ -138,11 +138,12 @@ plot_richness(phylo_bac , measures = c("Observed", "Chao1", "Shannon", "InvSimps
 
 #---------------------------------------------------------------------------------------------------------
 # beta diversity
-beta_div_PCoA = ordinate(phylo_bac, method = "PCoA")
+# atenção, os metadados precisas de ter pelo menos 2 variaveis, caso contrário bug
+beta_div_PCoA = ordinate(phylo_bac, method = "PCoA", distance = "bray")
 plot_ordination(phylo_bac, beta_div_PCoA, color = "kit") + ggtitle("Beta Diversity unnormalized PCoA")
 
 
-beta_div_nmds = ordinate(phylo_bac, method="NMDS")
+beta_div_nmds = ordinate(phylo_bac, method="NMDS", distance = "bray")
 plot_ordination(phylo_bac, beta_div_nmds, color = "kit") + ggtitle("Beta Diversity unnormalized NMDS")
 
 
@@ -163,13 +164,14 @@ plot_richness(dbac_rare , measures = c("Observed", "Chao1", "Shannon", "InvSimps
 
 #---------------------------------------------------------------------------------------------------------
 # beta diversity mormalized
+# atenção, os metadados precisas de ter pelo menos 2 variaveis, caso contrário bug
 #PCoA
-beta_div_PCoA_n = ordinate(dbac_rare, method = "PCoA")
+beta_div_PCoA_n = ordinate(dbac_rare, method = "PCoA", distance = "bray")
 plot_ordination(dbac_rare, beta_div_PCoA_n, color = "kit") + ggtitle("Beta Diversity normalized PCoA")
 
 
 #NMDS
-beta_div_nmds_n = ordinate(dbac_rare, method="NMDS")
+beta_div_nmds_n = ordinate(dbac_rare, method="NMDS", distance = "bray")
 plot_ordination(dbac_rare, beta_div_nmds_n, color = "kit") + ggtitle("Beta Diversity normalized NMDS")
 
 
