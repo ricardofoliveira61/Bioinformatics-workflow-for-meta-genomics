@@ -29,7 +29,7 @@ if (length(missing_packages) > 0) {
 
 
 # loading packages
-library(phyloseq)
+library(phyloseq); message("Phyloseq version: ",packageVersion("phyloseq"))
 library(Biostrings)
 library(dplyr)
 library(ggplot2)
@@ -50,14 +50,14 @@ tax_class = "C:\\Users\\ricar\\Desktop\\Teste\\assignment_results\\teste_v4\\tes
 tax_class = "C:\\Users\\ricar\\Desktop\\Teste\\assignment_results\\teste_v4\\teste_SILVA_classification_results.xlsx"
 asv_seqs = "C:\\Users\\ricar\\Desktop\\Teste\\V4\\Results\\V4_asv_single_refseq.fa"
 asv_count = "C:\\Users\\ricar\\Desktop\\Teste\\V4\\Results\\V4_amplicon_results.xlsx"
-meta_samples = "C:\\Users\\ricar\\Desktop\\Teste\\V4\\meta_mock1.tsv"
+meta_samples = "C:\\Users\\ricar\\Desktop\\Teste\\V4\\meta_mock1.csv"
 
 read_data = function(filepath) {
   # Extract file extension
   extension = tools::file_ext(filepath)
   # Read data based on extension
   if (extension == "tsv") {
-    read.table(filepath, header = TRUE, row.names = 1, check.names = FALSE, sep = "\t")
+    read.table(filepath, header = TRUE, check.names = FALSE, sep = "\t")
   } else if (extension == "xlsx") {
     # Use readxl package to read xlsx files
     library(readxl)
@@ -72,7 +72,8 @@ read_data = function(filepath) {
 
 
 # tranformar os nomes das colunas em minusculas
-
+#----------------------------------------------------------------------------------------------------------
+# Data importation
 # preparing the taxonomic classification dataframe
 tax = as.data.frame(read_data(tax_class))
 if ("confidence" %in% colnames(tax)){
@@ -91,6 +92,7 @@ counts = phyloseq::otu_table(asv_counts, taxa_are_rows = TRUE)
 meta = as.data.frame(read_data(meta_samples))
 
 
+#----------------------------------------------------------------------------------------------------------
 # creating phyloseq object
 phylo = phyloseq(counts, seqs, sample_data(meta), tax_table(tax))
 phylo
@@ -128,35 +130,76 @@ phylo_bac = filter_taxa(phylo_bac_all, function(x) {sum(x > 0) > 1}, TRUE)
 
 # fazer com e sem normalização
 # sem normalização (apenas filtragem)
-#plot_richness(phylo_bac, measures=c("Observed", "Simpson", "Shannon"))
-plot_richness(phylo_bac , measures = c("Observed", "Chao1", "Shannon", "Simpson", "InvSimpson", "Fisher"))
-
-phyloseq::plot_bar(phylo_bac, fill = "phylum")
-
-
-# como mocks faz sentido até genero
-phylo_bac = phyloseq::tax_glom(phylo_bac, "genus", NArm = TRUE)
+#--------------------------------------------------------------------------------------------------------
+# alpha diversity
+plot_richness(phylo_bac , measures = c("Observed", "Chao1", "Shannon", "InvSimpson", "Fisher"),
+              color = "kit" ) + ggtitle("Alpha diversity unnormalized")
 
 
-# normalização das contagens
-# normalização da profundidade de sequenciação
+#---------------------------------------------------------------------------------------------------------
+# beta diversity
+beta_div_PCoA = ordinate(phylo_bac, method = "PCoA")
+plot_ordination(phylo_bac, beta_div_PCoA, color = "kit") + ggtitle("Beta Diversity unnormalized PCoA")
+
+
+beta_div_nmds = ordinate(phylo_bac, method="NMDS")
+plot_ordination(phylo_bac, beta_div_nmds, color = "kit") + ggtitle("Beta Diversity unnormalized NMDS")
+
+
+#--------------------------------------------------------------------------------------------------------
+# Normalization
+# rarefaction
 dbac_rare = rarefy_even_depth(phylo_bac, sample.size = min(sample_sums(phylo_bac)), replace = FALSE)
 
-# normalização frequências relativas das reads
+# Relative frequencies
 dbacr = transform_sample_counts(phylo_bac, function(x) x/sum(x))
 
 
-phyloseq::plot_bar(dbac_rare, fill = "phylum") 
+#--------------------------------------------------------------------------------------------------------
+# alpha diversity normalized
+plot_richness(dbac_rare , measures = c("Observed", "Chao1", "Shannon", "InvSimpson", "Fisher"),
+              color = "kit") + ggtitle("Alpha diversity normalized")
 
 
-phyloseq::plot_bar(dbacr, fill = "phylum") 
+#---------------------------------------------------------------------------------------------------------
+# beta diversity mormalized
+#PCoA
+beta_div_PCoA_n = ordinate(dbac_rare, method = "PCoA")
+plot_ordination(dbac_rare, beta_div_PCoA_n, color = "kit") + ggtitle("Beta Diversity normalized PCoA")
 
 
-phyloseq::plot_bar(dbacr, fill = "family")
+#NMDS
+beta_div_nmds_n = ordinate(dbac_rare, method="NMDS")
+plot_ordination(dbac_rare, beta_div_nmds_n, color = "kit") + ggtitle("Beta Diversity normalized NMDS")
 
 
-phyloseq::plot_bar(dbacr, fill = "genus")
+#--------------------------------------------------------------------------------------------------------
+#Taxonomic composition
+
+phyloseq::plot_bar(dbac_rare, fill = "phylum") + ggtitle("Taxonomic composition: Phylum")
+
+phyloseq::plot_bar(dbac_rare, fill = "class") + ggtitle("Taxonomic composition: Class")
+
+phyloseq::plot_bar(dbac_rare, fill = "order") + ggtitle("Taxonomic composition: Order")
+
+phyloseq::plot_bar(dbac_rare, fill = "family") + ggtitle("Taxonomic composition: Family")
+
+phyloseq::plot_bar(dbac_rare, fill = "genus") + ggtitle("Taxonomic composition: Genus")
 
 
-plot_richness(dbac_rare, measures=c("Chao1", "Shannon"))
+phylo_bac_tax_algo = phyloseq::tax_glom(dbac_rare, "phylum", NArm = TRUE)
+phyloseq::plot_bar(phylo_bac_tax_algo, fill = "phylum") 
+
+phylo_bac_tax_algo = phyloseq::tax_glom(dbac_rare, "class", NArm = TRUE)
+phyloseq::plot_bar(phylo_bac_tax_algo, fill = "class")
+
+phylo_bac_tax_algo = phyloseq::tax_glom(dbac_rare, "order", NArm = TRUE)
+phyloseq::plot_bar(phylo_bac_tax_algo, fill = "order")
+
+phylo_bac_tax_algo = phyloseq::tax_glom(dbac_rare, "family", NArm = TRUE)
+phyloseq::plot_bar(phylo_bac_tax_algo, fill = "family")
+
+phylo_bac_tax_algo = phyloseq::tax_glom(dbac_rare, "genus", NArm = TRUE)
+phyloseq::plot_bar(phylo_bac_tax_algo, fill = "genus")
+
 
