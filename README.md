@@ -9,3 +9,28 @@ Our project aims to evaluate the performance of metabarcoding analysis tools usi
 For this purpose, we will resort to commercial mock community sequencing datasets (e.g. Zymobiomics and ATCC) and customized mock communities created in our lab, which facilitates bioinformatic performance assessment 
 
 We intend to develop a set of customizable scripts that use the best tool for each phase of the analysis process by default. Nevertheless, the user will have the option to choose which tool to use and set the desired parameters for every analysis phase. Furthermore, our scripts will incorporate a set of metrics that allow measure the performance of the chosen workflow and evaluate if the results meet the established standards or if changes to the workflow are necessary to provide a more accurate result. Finally, we plan to apply the developed scripts to a real case study in our laboratory.
+
+# Utilization of the developed tool
+For the utilization of this tool it's necessary the instalation of [Python](https://www.python.org/downloads/) and [R](https://cran.r-project.org/mirrors.html)
+After the installation of the requiered software run the script named main.py located inside the scripts directory
+
+The script will initialize with a greating message informing the user about the tools incorporated, folliwng to ask the user the working directory. This directory should be given in absolute path and must exist on the system.
+The user can choose one of 4 actions: Perform amplicon analysis, perform taxonomic assignment, explore the results or exit the script.
+
+## Amplicon analysis
+This module integrates the Bioconductor package [DADA2](https://benjjneb.github.io/dada2/tutorial.html) to perfomr amplicon analysis. For the script proceed with the analysis the user will be asked for a project name which only should contain alphanumeric characters (a-z, A-Z, 0-9), underscores (_) and hyphens (-), for the absolute path of the fastaq files, for the software to utilize (currently only DADA2 is supported), for the sequencing platform (only Illumina is currentely supported) and last for the region of the r16S sequencind (at the moment only the regions V4 and V3-V4 are supported).
+Afeterward the script of amplicon analysis will run and two files are expected as output: One xlsx file containing the read count of each ASV for all samples with a report of the number of reads in each phase of amplicon analysis and one fasta file containing the name given to the ASV and the sequence which represents it. In addition, quality profile plots and errors plots will also be genareted on a folder named **Plots**
+
+**Attention** Some times some erros can occure during this stage, including problems with the installation of certain R packages necessary for the analysis, so always check if the output files are in accordance with the expected and if necessary run it again
+
+## Taxonomic assignment
+This module integrates the R package [Decipher](http://www2.decipher.codes/) to carry out taxonomic assignment. As the previous module this one also ask the useres the name of the project, the classifer algorithm to use (currently only decipher is available), the reference database (at present only RDP and SILVA are available) and lastly the absoute location to the fasta file (**Note:** The absolute path must include the fasta file name)
+Currently the reference databases are not deliver with the repository so the user must download them previously form the Decipher website, going trough the section downloads and the dataset RDP v18 (unmodified) and SILVA SSU r138 (modified) with the extensio .RDA. After the download the user must create a directory on the main directory of the repository with the name **Databases** and copy the databases inside.
+Is expected that when the script is done a xlsx file is generated storing the taxonomic classification for each ASV including the confidence in that result
+
+## Results exploration
+This module integrates the R package [Phyloseq](https://joey711.github.io/phyloseq/). For this module the user will be asked to give a project name used to name the generated files, the absolute path (including the file name) to the fasta file contaning the sequence corresponding to each asv, the absolute path (including the file name) to xlsx file containing the counts of each ASV in each sample, the absolute path (including the file name) to the xlsx file contaning the taxonomic results and the absolute path (including the file name) to the metadata intended to use in this analysis.
+After all the information being given, this module will genarate diverse png files where is possible to analyse alfa diversity, beta diversity and taxonomic composition of each taxa.
+
+In case of any errors or bugs during your utilization please use this repository to reporting them creating a new issue or a new pull request.
+For further information please contact this email: ricardofoliveira61@gmail.com
