@@ -250,7 +250,6 @@ def script(state:int,workdir:str, main_path:str):
         project, classifier_met, data_base, fasta_path = classifier()
         classier_script_2_run(workdir, project, classifier_met, data_base, fasta_path, main_path)
         
-
     elif state == 3:
         print("\nNot available yet")
 
